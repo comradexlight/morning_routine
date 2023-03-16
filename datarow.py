@@ -8,4 +8,5 @@ class DataRow(NamedTuple):
     quantity_shop1: float
     quantity_shop2: float
     quantity_shop3: float
-    img: str
+    quantity_secret: float
+    # img: str
