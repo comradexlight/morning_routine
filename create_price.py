@@ -2,7 +2,7 @@ import sys
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 from PIL.PngImagePlugin import PngImageFile
-from data_model import PriceItem, WarehouseItem, ShopItem
+from data_model import PriceItem, WarehouseItem, ShopItem, warehouse_title_line
 from get_data_from_xlsx import get_data_from_xlsx
 
 
@@ -10,6 +10,7 @@ def prepare_price(data:list[PriceItem], mode: str) -> list[tuple]:
     prepared_price = []
     match mode:
         case 'warehouse':
+            prepared_price.append(warehouse_title_line)
             for item in data:
                 prepared_price.append(
                     WarehouseItem(
@@ -23,6 +24,19 @@ def prepare_price(data:list[PriceItem], mode: str) -> list[tuple]:
                     )
                     )
         case 'shop':
+            for item in data:
+                prepared_price.append(
+                    ShopItem(
+                    title=item.title,
+                    shop_price=item.warehouse_price,
+                    quantity_shop1 = item.quantity_shop1,
+                    quantity_warehouse=item.quantity_warehouse,
+                    quantity_shop2 = item.quantity_shop2,
+                    quantity_shop3 = item.quantity_shop3,
+                    img=item.img
+                    )
+                    )
+        case 'small':
             for item in data:
                 prepared_price.append(
                     ShopItem(

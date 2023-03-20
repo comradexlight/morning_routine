@@ -36,3 +36,21 @@ class ShopItem(NamedTuple):
     quantity_shop2: float
     quantity_shop3: float
     img: Union[PngImageFile,None]
+
+
+class SmallWholesaleItem(NamedTuple):
+    title: str
+    img: Union[PngImageFile,None]
+    small_wholesale_price: Union[int, None]
+    quantity_warehouse: float
+
+
+warehouse_title_line = WarehouseItem(
+        title = 'Наименование',
+        warehouse_price = 'Цена склада',
+        quantity_warehouse = '1. Основной склад',
+        quantity_shop1 = '2. ЦЧК',
+        quantity_shop2 = '3. Дом Чая',
+        quantity_shop3 = '4. Аллея',
+        img = 'Картинка'
+        )
