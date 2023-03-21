@@ -48,9 +48,10 @@ class SmallWholesaleItem(NamedTuple):
 warehouse_title_line = WarehouseItem(
         title = 'Наименование',
         warehouse_price = 'Цена склада',
-        quantity_warehouse = '1. Основной склад',
-        quantity_shop1 = '2. ЦЧК',
-        quantity_shop2 = '3. Дом Чая',
-        quantity_shop3 = '4. Аллея',
+        quantity_warehouse = '01.Склад',
+        quantity_shop1 = '02.ЦЧК',
+        quantity_shop2 = '03.Дом Чая',
+        quantity_shop3 = '04.Аллея',
         img = 'Картинка'
         )
+        
