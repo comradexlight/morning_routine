@@ -20,12 +20,12 @@ class PriceItem(NamedTuple):
 
 class WarehouseItem(NamedTuple):
     title: str
-    warehouse_price: Union[int, None] 
-    quantity_warehouse: float
-    quantity_shop1: float
-    quantity_shop2: float
-    quantity_shop3: float
-    img: Union[PngImageFile,None]
+    warehouse_price: Union[int, str, None] 
+    quantity_warehouse: Union[float, str]
+    quantity_shop1: Union[float, str]
+    quantity_shop2: Union[float, str]
+    quantity_shop3: Union[float, str]
+    img: Union[PngImageFile, str, None]
 
 
 class ShopItem(NamedTuple):
