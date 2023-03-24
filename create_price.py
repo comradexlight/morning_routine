@@ -1,10 +1,11 @@
 import sys
+from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import PatternFill, Border, Side
 from openpyxl.worksheet.worksheet import Worksheet
 from PIL.PngImagePlugin import PngImageFile
-from data_model import PriceItem, WarehouseItem, ShopItem, warehouse_title_line
+from data_model import PriceItem, WarehouseItem, ShopItem, warehouse_title_line, shop_title_line
 from get_data_from_xlsx import get_data_from_xlsx
 
 
@@ -13,7 +14,7 @@ def prepare_price(data:list[PriceItem], mode: str) -> list[WarehouseItem]:
     match mode:
         case 'warehouse':
             prepared_price.append(warehouse_title_line)
-            for item in data:
+            for item in data:   
                 prepared_price.append(
                     WarehouseItem(
                     title=item.title,
@@ -26,11 +27,12 @@ def prepare_price(data:list[PriceItem], mode: str) -> list[WarehouseItem]:
                     )
                     )
         case 'shop':
+            prepared_price.append(shop_title_line)
             for item in data:
                 prepared_price.append(
                     ShopItem(
                     title=item.title,
-                    shop_price=item.warehouse_price,
+                    shop_price=item.shop_price,
                     quantity_shop1 = item.quantity_shop1,
                     quantity_warehouse=item.quantity_warehouse,
                     quantity_shop2 = item.quantity_shop2,
@@ -65,55 +67,30 @@ def print_border(ws: Worksheet, row: int, column: int) -> None:
                                                     bottom=Side(border_style='thin', color='000000')
                                                     )
 
-def new_paint_cell(ws: Worksheet,
-                   title_line: WarehouseItem,
-                   row: int,
-                   column: int) -> None:
-    
-    warehouse_column = title_line.index('01.Склад')
-    shop1_column = title_line.index('02.ЦЧК')
-    shop2_column = title_line.index('03.Дом Чая')
-    shop3_column = title_line.index('04.Аллея')
 
-    if column == warehouse_column:
-        ws.cell(row=row, column=column).fill = PatternFill('solid',
-                                                           start_color='C4D79B')
-    elif column == shop1_column:
-        ws.cell(row=row, column=column).fill = PatternFill('solid',
-                                                           start_color='92CDDC')
-    elif column == shop2_column:
-        ws.cell(row=row, column=column).fill = PatternFill('solid',
-                                                           start_color='FABF8F')
-    elif column == shop3_column:
-        ws.cell(row=row, column=column).fill = PatternFill('solid',
-                                                           start_color='95B3D7')
-
-
-def create_price(prepared_price: list[WarehouseItem]) -> None:
+def create_price(prepared_price: list[tuple], name) -> None:
     wb = Workbook()
     ws = wb.active
 
-    # warehouse_column = prepared_price[0].index('01.Склад')
-    # shop1_column = prepared_price[0].index('02.ЦЧК')
-    # shop2_column = prepared_price[0].index('03.Дом Чая')
-    # shop3_column = prepared_price[0].index('04.Аллея')
+    warehouse_column = prepared_price[0].index('01.Склад') + 1
+    shop1_column = prepared_price[0].index('02.ЦЧК') + 1
+    shop2_column = prepared_price[0].index('03.Дом Чая') + 1
+    shop3_column = prepared_price[0].index('04.Аллея') + 1
 
 
     for item_number, item in enumerate(prepared_price, 1):
         for field_number, field in enumerate(item, 1):
 
             print_border(ws, row=item_number, column=field_number)
-            new_paint_cell(ws=ws, title_line=prepared_price[0],
-                           row=item_number, column=field_number)
 
-            # if field_number == warehouse_column:
-                # paint_cell(ws, row=item_number, column=field_number, color='C4D79B')
-            # elif field_number == shop1_column:
-                # paint_cell(ws, row=item_number, column=field_number, color='92CDDC')
-            # elif field_number == shop2_column:
-                # paint_cell(ws, row=item_number, column=field_number, color='FABF8F')
-            # elif field_number == shop3_column:
-                # paint_cell(ws, row=item_number, column=field_number, color='95B3D7')
+            if field_number == warehouse_column:
+                paint_cell(ws, row=item_number, column=field_number, color='C4D79B')
+            elif field_number == shop1_column:
+                paint_cell(ws, row=item_number, column=field_number, color='92CDDC')
+            elif field_number == shop2_column:
+                paint_cell(ws, row=item_number, column=field_number, color='FABF8F')
+            elif field_number == shop3_column:
+                paint_cell(ws, row=item_number, column=field_number, color='95B3D7')
 
             if isinstance(field, PngImageFile):
                 ws.row_dimensions[item_number].height = 56 
@@ -123,14 +100,17 @@ def create_price(prepared_price: list[WarehouseItem]) -> None:
                 ws.cell(row=item_number, column=field_number).value = field
 
     ws.column_dimensions['A'].width = 90 #TODO: тут нужно сделать autofit для всех колонок
-    wb.save('baza.xlsx')
+    wb.save(name)
 
 
 def main() -> None:
+    date = datetime.now().strftime('%Y_%m_%d')
     path = sys.argv[1]
     data = get_data_from_xlsx(path)
-    prepared_price = prepare_price(data=data, mode='warehouse')
-    create_price(prepared_price)
+    mode = sys.argv[2]
+    prepared_price = prepare_price(data=data, mode=mode)
+    name = f'{mode}_{date}.xlsx'
+    create_price(prepared_price, name)
 
 
 if __name__ == '__main__':
