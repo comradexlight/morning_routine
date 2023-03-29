@@ -5,7 +5,7 @@ from openpyxl.drawing.image import Image
 from openpyxl.styles import PatternFill, Border, Side
 from openpyxl.worksheet.worksheet import Worksheet
 from PIL.PngImagePlugin import PngImageFile
-from data_model import PriceItem, WarehouseItem, ShopItem, warehouse_title_line, shop_title_line
+from data_model import PriceItem, WarehouseItem, ShopItem, SmallWholesaleItem, warehouse_title_line, shop_title_line, small_wholesale_title_line
 from get_data_from_xlsx import get_data_from_xlsx
 
 
@@ -41,18 +41,18 @@ def prepare_price(data:list[PriceItem], mode: str) -> list[WarehouseItem]:
                     )
                     )
         case 'small':
+            prepared_price.append(small_wholesale_title_line)
             for item in data:
-                prepared_price.append(
-                    ShopItem(
-                    title=item.title,
-                    shop_price=item.warehouse_price,
-                    quantity_shop1 = item.quantity_shop1,
-                    quantity_warehouse=item.quantity_warehouse,
-                    quantity_shop2 = item.quantity_shop2,
-                    quantity_shop3 = item.quantity_shop3,
-                    img=item.img
-                    )
-                    )
+                if item.quantity_warehouse >= 0.1 and item.small_wholesale_price:
+                    prepared_price.append(
+                        SmallWholesaleItem(
+                        title=item.title,
+                        small_wholesale_price=item.small_wholesale_price,
+                        img=item.img,
+                        order = 0.0,
+                        cost = None
+                        )
+                        )
     return prepared_price
 
 
@@ -103,6 +103,32 @@ def create_price(prepared_price: list[tuple], name) -> None:
     wb.save(name)
 
 
+def add_math(ws: Worksheet) -> None:
+    last_row = ws.max_row
+    for row_number, cell in enumerate(ws['E2': f'E{last_row}'], 2):
+        cell[0].value = f'=PRODUCT(C{row_number} : D{row_number})'
+
+    ws[f'E{last_row + 2}'].value = f'=SUM(E2 : E{last_row})'
+
+def create_wholesale_price(prepared_price: list[tuple]) -> Workbook:
+    wb = Workbook()
+    ws = wb.active
+    for item_number, item in enumerate(prepared_price, 1):
+        for field_number, field in enumerate(item, 1):
+            print_border(ws, row=item_number, column=field_number)
+
+            if isinstance(field, PngImageFile):
+                ws.row_dimensions[item_number].height = 56 
+                anchor = ws.cell(row=item_number, column=field_number).coordinate
+                ws.add_image(Image(field), anchor=anchor)
+            else:
+                ws.cell(row=item_number, column=field_number).value = field
+            ws.cell
+    ws.column_dimensions['A'].width = 90 #TODO: тут нужно сделать autofit для всех колонок
+    add_math(ws)
+    return wb
+
+
 def main() -> None:
     date = datetime.now().strftime('%Y_%m_%d')
     path = sys.argv[1]
@@ -110,7 +136,9 @@ def main() -> None:
     mode = sys.argv[2]
     prepared_price = prepare_price(data=data, mode=mode)
     name = f'{mode}_{date}.xlsx'
-    create_price(prepared_price, name)
+    workbook = create_wholesale_price(prepared_price)
+    workbook.save(name)
+    # create_price(prepared_price, name)
 
 
 if __name__ == '__main__':

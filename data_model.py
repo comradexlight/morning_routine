@@ -1,4 +1,4 @@
-from typing import NamedTuple, Union
+from typing import NamedTuple, Union, Literal
 from PIL.PngImagePlugin import PngImageFile
 
 
@@ -40,9 +40,10 @@ class ShopItem(NamedTuple):
 
 class SmallWholesaleItem(NamedTuple):
     title: str
-    img: Union[PngImageFile,None]
-    small_wholesale_price: Union[int, None]
-    quantity_warehouse: float
+    img: Union[PngImageFile, Literal['Картинка'], None]
+    small_wholesale_price: Union[int, Literal['Цена склада'], None]
+    order: Union[float, Literal['Заказ']]
+    cost: Union[float, Literal['Стоимость'], None]
 
 
 warehouse_title_line = WarehouseItem(
@@ -65,3 +66,12 @@ shop_title_line = ShopItem(
         quantity_shop3 = '04.Аллея',
         img = 'Картинка'
         )
+
+
+small_wholesale_title_line = SmallWholesaleItem(
+    title = 'Наименование',
+    img = 'Картинка',
+    small_wholesale_price = 'Цена склада',
+    order = 'Заказ',
+    cost = 'Стоимость'
+)
