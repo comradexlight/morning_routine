@@ -1,15 +1,20 @@
 import sys
+import time
+
+from multiprocessing import Process
+
 from datetime import datetime
+from time import sleep
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import PatternFill, Border, Side
 from openpyxl.worksheet.worksheet import Worksheet
 from PIL.PngImagePlugin import PngImageFile
-from data_model import PriceItem, WarehouseItem, ShopItem, SmallWholesaleItem, warehouse_title_line, shop_title_line, small_wholesale_title_line
+from data_model import PriceItem, WarehouseItem, ShopItem, SmallWholesaleItem, MediumWholesaleItem, LargeWholesaleItem, warehouse_title_line, shop_title_line, small_wholesale_title_line, medium_wholesale_title_line, large_wholesale_title_line
 from get_data_from_xlsx import get_data_from_xlsx
 
 
-def prepare_price(data:list[PriceItem], mode: str) -> list[WarehouseItem]:
+def prepare_price(data:list[PriceItem], mode: str) -> list[tuple]:
     prepared_price = []
     match mode:
         case 'warehouse':
@@ -53,6 +58,32 @@ def prepare_price(data:list[PriceItem], mode: str) -> list[WarehouseItem]:
                         cost = None
                         )
                         )
+        case 'medium':
+            prepared_price.append(medium_wholesale_title_line)
+            for item in data:
+                if item.quantity_warehouse >= 0.1 and item.medium_wholesale_price:
+                    prepared_price.append(
+                        MediumWholesaleItem(
+                        title=item.title,
+                        medium_wholesale_price=item.medium_wholesale_price,
+                        img=item.img,
+                        order = 0.0,
+                        cost = None
+                        )
+                        )
+        case 'large':
+            prepared_price.append(large_wholesale_title_line)
+            for item in data:
+                if item.quantity_warehouse >= 0.1 and item.large_wholesale_price:
+                    prepared_price.append(
+                        LargeWholesaleItem(
+                        title=item.title,
+                        large_wholesale_price=item.large_wholesale_price,
+                        img=item.img,
+                        order = 0.0,
+                        cost = None
+                        )
+                        )
     return prepared_price
 
 
@@ -68,7 +99,7 @@ def print_border(ws: Worksheet, row: int, column: int) -> None:
                                                     )
 
 
-def create_price(prepared_price: list[tuple], name) -> None:
+def create_price(prepared_price: list[tuple]) -> Workbook:
     wb = Workbook()
     ws = wb.active
 
@@ -100,7 +131,7 @@ def create_price(prepared_price: list[tuple], name) -> None:
                 ws.cell(row=item_number, column=field_number).value = field
 
     ws.column_dimensions['A'].width = 90 #TODO: тут нужно сделать autofit для всех колонок
-    wb.save(name)
+    return wb
 
 
 def add_math(ws: Worksheet) -> None:
@@ -123,23 +154,35 @@ def create_wholesale_price(prepared_price: list[tuple]) -> Workbook:
                 ws.add_image(Image(field), anchor=anchor)
             else:
                 ws.cell(row=item_number, column=field_number).value = field
-            ws.cell
     ws.column_dimensions['A'].width = 90 #TODO: тут нужно сделать autofit для всех колонок
     add_math(ws)
     return wb
 
 
-def main() -> None:
+def main(mode: str) -> None:
+    print(f'начинаем {mode}\n{"*"*80}')
     date = datetime.now().strftime('%Y_%m_%d')
     path = sys.argv[1]
     data = get_data_from_xlsx(path)
-    mode = sys.argv[2]
     prepared_price = prepare_price(data=data, mode=mode)
     name = f'{mode}_{date}.xlsx'
-    workbook = create_wholesale_price(prepared_price)
+    if mode in ['warehouse', 'shop']:
+        workbook = create_price(prepared_price)
+    elif mode in ['small', 'medium', 'large']:
+        workbook = create_wholesale_price(prepared_price)
     workbook.save(name)
-    # create_price(prepared_price, name)
+    workbook.close()
+    print(f'{mode} готов\n{"*"*80}')
 
 
 if __name__ == '__main__':
-    main()
+    start_time = time.time()
+    processes = []
+
+    for mode in ['warehouse', 'shop', 'small', 'medium', 'large']:
+        processes.append(Process(target=main, args=(mode,), daemon=True))
+        
+    [p.start() for p in processes]
+    [p.join() for p in processes]
+
+    print(time.time() - start_time)
