@@ -1,8 +1,6 @@
 import sys
 import time
-
 from multiprocessing import Process
-
 from datetime import datetime
 from time import sleep
 from openpyxl import Workbook
@@ -12,9 +10,9 @@ from openpyxl.worksheet.worksheet import Worksheet
 from PIL.PngImagePlugin import PngImageFile
 from data_model import PriceItem, WarehouseItem, ShopItem, SmallWholesaleItem, MediumWholesaleItem, LargeWholesaleItem, warehouse_title_line, shop_title_line, small_wholesale_title_line, medium_wholesale_title_line, large_wholesale_title_line
 from get_data_from_xlsx import get_data_from_xlsx
+from fix_1c_error import fix_1c_error
 
-
-def prepare_price(data:list[PriceItem], mode: str) -> list[tuple]:
+def prepare_price(data: list[PriceItem], mode: str) -> list[tuple]:
     prepared_price = []
     match mode:
         case 'warehouse':
@@ -159,10 +157,11 @@ def create_wholesale_price(prepared_price: list[tuple]) -> Workbook:
     return wb
 
 
-def main(mode: str) -> None:
+def main(path: str, mode: str, date: str) -> None:
     print(f'начинаем {mode}\n{"*"*80}')
-    date = datetime.now().strftime('%Y_%m_%d')
-    path = sys.argv[1]
+    # date = datetime.now().strftime('%Y_%m_%d')
+
+    # path = sys.argv[1]
     data = get_data_from_xlsx(path)
     prepared_price = prepare_price(data=data, mode=mode)
     name = f'{mode}_{date}.xlsx'
@@ -177,10 +176,17 @@ def main(mode: str) -> None:
 
 if __name__ == '__main__':
     start_time = time.time()
+
+    path = sys.argv[1]
+    fix_1c_error(path)
+
+    data = get_data_from_xlsx(path)
+    date = datetime.now().strftime('%Y_%m_%d')
+        
     processes = []
 
     for mode in ['warehouse', 'shop', 'small', 'medium', 'large']:
-        processes.append(Process(target=main, args=(mode,), daemon=True))
+        processes.append(Process(target=main, args=(path, mode, date,), daemon=True))
         
     [p.start() for p in processes]
     [p.join() for p in processes]
