@@ -45,9 +45,8 @@ def get_data_from_xlsx(path: str) -> list[PriceItem]:
                                 quantity_warehouse = _get_quantity(row[20].value),
                                 quantity_shop1 = _get_quantity(row[22].value),
                                 quantity_shop2 = _get_quantity(row[24].value),
-                                quantity_shop3 = _get_quantity(row[26].value),
+                                secret_warehouse = _get_quantity(row[26].value),
                                 img = _get_image(image_loader, row[13]), 
-                                secret_warehouse = _get_quantity(row[28].value)
                                 )
                             )
     return row_list

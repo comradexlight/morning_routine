@@ -25,7 +25,6 @@ def prepare_price(data: list[PriceItem], mode: str) -> list[tuple]:
                     quantity_warehouse=item.quantity_warehouse,
                     quantity_shop1 = item.quantity_shop1,
                     quantity_shop2 = item.quantity_shop2,
-                    quantity_shop3 = item.quantity_shop3,
                     img=item.img
                     )
                     )
@@ -39,7 +38,6 @@ def prepare_price(data: list[PriceItem], mode: str) -> list[tuple]:
                     quantity_shop1 = item.quantity_shop1,
                     quantity_warehouse=item.quantity_warehouse,
                     quantity_shop2 = item.quantity_shop2,
-                    quantity_shop3 = item.quantity_shop3,
                     img=item.img
                     )
                     )
@@ -104,7 +102,6 @@ def create_price(prepared_price: list[tuple]) -> Workbook:
     warehouse_column = prepared_price[0].index('01.Склад') + 1
     shop1_column = prepared_price[0].index('02.ЦЧК') + 1
     shop2_column = prepared_price[0].index('03.Дом Чая') + 1
-    shop3_column = prepared_price[0].index('04.Аллея') + 1
 
 
     for item_number, item in enumerate(prepared_price, 1):
@@ -118,8 +115,6 @@ def create_price(prepared_price: list[tuple]) -> Workbook:
                 paint_cell(ws, row=item_number, column=field_number, color='92CDDC')
             elif field_number == shop2_column:
                 paint_cell(ws, row=item_number, column=field_number, color='FABF8F')
-            elif field_number == shop3_column:
-                paint_cell(ws, row=item_number, column=field_number, color='95B3D7')
 
             if isinstance(field, PngImageFile):
                 ws.row_dimensions[item_number].height = 56 

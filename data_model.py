@@ -13,7 +13,6 @@ class PriceItem(NamedTuple):
     quantity_warehouse: float
     quantity_shop1: float
     quantity_shop2: float
-    quantity_shop3: float
     img: Union[PngImageFile,None]
     secret_warehouse: float
 
@@ -24,7 +23,6 @@ class WarehouseItem(NamedTuple):
     quantity_warehouse: Union[float, Literal['01.Склад']]
     quantity_shop1: Union[float, Literal['02.ЦЧК']]
     quantity_shop2: Union[float, Literal['03.Дом Чая']]
-    quantity_shop3: Union[float, Literal['04.Аллея']]
     img: Union[PngImageFile, Literal['Картинка'], None]
 
 
@@ -34,7 +32,6 @@ class ShopItem(NamedTuple):
     quantity_shop1: Union[float, Literal['02.ЦЧК']]
     quantity_warehouse: Union[float, Literal['01.Склад']]
     quantity_shop2: Union[float, Literal['03.Дом Чая']]
-    quantity_shop3: Union[float, Literal['04.Аллея']]
     img: Union[PngImageFile, Literal['Картинка']]
 
 
@@ -68,7 +65,6 @@ warehouse_title_line = WarehouseItem(
         quantity_warehouse = '01.Склад',
         quantity_shop1 = '02.ЦЧК',
         quantity_shop2 = '03.Дом Чая',
-        quantity_shop3 = '04.Аллея',
         img = 'Картинка'
         )
         
@@ -78,7 +74,6 @@ shop_title_line = ShopItem(
         quantity_shop1 = '02.ЦЧК',
         quantity_warehouse = '01.Склад',
         quantity_shop2 = '03.Дом Чая',
-        quantity_shop3 = '04.Аллея',
         img = 'Картинка'
         )
 
